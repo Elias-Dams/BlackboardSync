@@ -159,9 +159,6 @@ class BlackboardDownload:
         # Omit file if it hasn't been modified since last sync
         elif res in (BBResourceType.file, BBResourceType.document) and has_changed:
 
-            if content.title == "Deel 1 - Introductie en course outline":
-                print("Deel 1 - Introductie en course outline")
-
             attachments = []
 
             try:
@@ -199,8 +196,7 @@ class BlackboardDownload:
 
         # If item has body, write in markdown file
         if content.body and has_changed:
-            if not parent_path.name == content.title_path_safe:
-                file_path.mkdir(exist_ok=True, parents=True)
+            file_path.mkdir(exist_ok=True, parents=True)
 
             # Parse content.body for more attachments
             parser = ContentParser(content.body, self._sess.base_url)
@@ -209,9 +205,6 @@ class BlackboardDownload:
                 safe_title = sanitize_filename(body_link.text, replacement_text='_')
                 download_path = Path(file_path / safe_title)
                 self.executor.submit(self._download_webdav_file, body_link.href, download_path)
-
-            with Path(file_path, f"{content.title_path_safe}.html").open('w', encoding='utf-8') as html_content:
-                html_content.write(parser.body)
 
     def download(self) -> Optional[datetime]:
         """Retrieve the user's courses, and start download of all contents
