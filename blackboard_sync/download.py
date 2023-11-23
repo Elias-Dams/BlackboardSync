@@ -158,11 +158,17 @@ class BlackboardDownload:
 
         # Omit file if it hasn't been modified since last sync
         elif res in (BBResourceType.file, BBResourceType.document) and has_changed:
+
+            if content.title == "Deel 1 - Introductie en course outline":
+                print("Deel 1 - Introductie en course outline")
+
             attachments = []
 
             try:
                 attachments = self._sess.fetch_file_attachments(course_id=course_id,
                                                                 content_id=content.id)
+            except ValueError:
+                self.logger.warn(f"Error while getting attachments for {course_id}")
 
             except RequestException:
                 self.logger.warn(f"Error while getting attachments for {course_id}")
@@ -193,7 +199,8 @@ class BlackboardDownload:
 
         # If item has body, write in markdown file
         if content.body and has_changed:
-            file_path.mkdir(exist_ok=True, parents=True)
+            if not parent_path.name == content.title_path_safe:
+                file_path.mkdir(exist_ok=True, parents=True)
 
             # Parse content.body for more attachments
             parser = ContentParser(content.body, self._sess.base_url)
